@@ -1,6 +1,8 @@
 #include "DataStruct.h"
 #include <stdexcept>
 #include <sstream>
+#include <iostream>
+#include <regex>
 
 StreamGuard::StreamGuard(std::basic_ios<char>& s) :
     s_(s),
