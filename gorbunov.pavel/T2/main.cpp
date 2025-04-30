@@ -7,8 +7,8 @@
 
 namespace
 {
-  bool compareDataStructs(const gorb::DataStruct & lhs, const gorb::DataStruct & rhs);
-  bool compareDataStructs(const gorb::DataStruct & lhs, const gorb::DataStruct & rhs)
+  bool compareDataStructs(const gorbunov::DataStruct & lhs, const gorbunov::DataStruct & rhs);
+  bool compareDataStructs(const gorbunov::DataStruct & lhs, const gorbunov::DataStruct & rhs)
   {
     if (lhs.key1 < rhs.key2)
     {
@@ -28,7 +28,7 @@ namespace
 
 int main()
 {
-  using namespace gorb;
+  using namespace gorbunov;
   std::vector< DataStruct > data;
   while (!std::cin.eof())
   {
