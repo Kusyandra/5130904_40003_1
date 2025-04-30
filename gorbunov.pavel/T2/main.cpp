@@ -30,8 +30,8 @@ int main()
 
     if (data.empty())
     {
-        std::cerr << "Warning: No valid data structures found\n";
-        return 0;
+        std::cerr << "Warning: No valid data structures found" << std::endl;
+        return 1;
     }
 
     std::sort(data.begin(), data.end(), compareDataStruct);
