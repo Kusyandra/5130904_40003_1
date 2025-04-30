@@ -1,24 +1,23 @@
 #include <vector>
 #include <algorithm>
 #include <iterator>
-#include <functional>
 #include <iostream>
-#include "data_struct.hpp"
+#include "custom_struct.hpp"
 
 namespace
 {
-  bool compareDataStructs(const petrov::DataStruct & lhs, const petrov::DataStruct & rhs);
-  bool compareDataStructs(const petrov::DataStruct & lhs, const petrov::DataStruct & rhs)
+  bool compareCustomData(const custom_namespace::CustomData & lhs, const custom_namespace::CustomData & rhs);
+  bool compareCustomData(const custom_namespace::CustomData & lhs, const custom_namespace::CustomData & rhs)
   {
-    if (lhs.key1 < rhs.key2)
+    if (lhs.firstValue < rhs.firstValue)
     {
       return true;
     }
-    else if (lhs.key2 < rhs.key2)
+    else if (lhs.secondValue < rhs.secondValue)
     {
       return true;
     }
-    else if (lhs.key3.length() < rhs.key3.length())
+    else if (lhs.thirdValue.length() < rhs.thirdValue.length())
     {
       return true;
     }
@@ -28,8 +27,8 @@ namespace
 
 int main()
 {
-  using namespace petrov;
-  std::vector< DataStruct > data;
+  using namespace custom_namespace;
+  std::vector<CustomData> dataList;
   while (!std::cin.eof())
   {
     if (!std::cin)
@@ -38,15 +37,15 @@ int main()
       std::cin.ignore(1024, '\n');
     }
     std::copy(
-      std::istream_iterator< DataStruct >(std::cin),
-      std::istream_iterator< DataStruct >(),
-      std::back_inserter(data)
+      std::istream_iterator<CustomData>(std::cin),
+      std::istream_iterator<CustomData>(),
+      std::back_inserter(dataList)
     );
   }
-  std::sort(data.begin(), data.end(), compareDataStructs);
+  std::sort(dataList.begin(), dataList.end(), compareCustomData);
   std::copy(
-      std::begin(data),
-      std::end(data),
-      std::ostream_iterator< DataStruct >(std::cout, "\n")
+      std::begin(dataList),
+      std::end(dataList),
+      std::ostream_iterator<CustomData>(std::cout, "\n")
   );
 }
