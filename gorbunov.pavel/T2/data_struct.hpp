@@ -1,57 +1,57 @@
-#ifndef DATA_STRUCT_HPP
-#define DATA_STRUCT_HPP
+#ifndef CUSTOM_STRUCT_HPP
+#define CUSTOM_STRUCT_HPP
 
 #include <iostream>
 #include <string>
 #include <iomanip>
 
-namespace petrov
+namespace custom_namespace
 {
-  struct DataStruct
+  struct CustomData
   {
-    double key1;
-    long long key2;
-    std::string key3;
+    double firstValue;
+    long long secondValue;
+    std::string thirdValue;
   };
 
-  struct DelimiterIO
+  struct TokenSeparator
   {
-    char exp;
+    char delimiter;
   };
 
-  struct DoubleIO
+  struct DoubleInput
   {
-    double & ref;
+    double & value;
   };
 
-  struct LongLongIO
+  struct LongLongInput
   {
-    long long & ref;
+    long long & value;
   };
 
-  struct StringIO
+  struct StringInput
   {
-    std::string & ref;
+    std::string & value;
   };
 
-  struct StreamGuard
+  class StreamManager
   {
   public:
-    explicit StreamGuard(std::basic_ios< char > & s);
-    ~StreamGuard();
+    explicit StreamManager(std::basic_ios< char > & stream);
+    ~StreamManager();
   private:
-    std::basic_ios< char > & s_;
+    std::basic_ios< char > & stream_;
     std::streamsize width_;
     char fill_;
     std::streamsize precision_;
-    std::basic_ios< char >::fmtflags fmt_;
+    std::basic_ios< char >::fmtflags format_;
   };
 
-  std::istream & operator>>(std::istream & in, DelimiterIO && dest);
-  std::istream & operator>>(std::istream & in, DoubleIO && dest);
-  std::istream & operator>>(std::istream & in, StringIO && dest);
-  std::istream & operator>>(std::istream & in, DataStruct & dest);
-  std::ostream & operator<<(std::ostream & out, const DataStruct & dest);
+  std::istream & operator>>(std::istream & in, TokenSeparator && token);
+  std::istream & operator>>(std::istream & in, DoubleInput && input);
+  std::istream & operator>>(std::istream & in, StringInput && input);
+  std::istream & operator>>(std::istream & in, CustomData & data);
+  std::ostream & operator<<(std::ostream & out, const CustomData & data);
 }
 
 #endif
