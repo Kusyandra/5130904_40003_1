@@ -31,7 +31,7 @@ int main()
 if (data.empty()) {
     std::cerr << "Warning: No valid data structures found\n";
     std::cerr << "Looks like there is no supported record. Cannot determine input. Test skipped\n";
-    return 1;  // Возвращаем код ошибки
+    return 1;
 }
 
     std::sort(data.begin(), data.end(), compareDataStruct);
