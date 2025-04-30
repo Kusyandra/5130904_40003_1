@@ -1,6 +1,6 @@
 #include "DataStruct.h"
 #include <stdexcept>
-#include <sstream>
+#include <sstream>  // Добавлено для использования std::ostringstream
 
 StreamGuard::StreamGuard(std::basic_ios<char>& s) :
     s_(s),
@@ -52,7 +52,7 @@ std::istream& operator>>(std::istream& in, LabelIO& sep)
 
 std::string getCorrectRound(double num)
 {
-    std::ostringstream oss;
+    std::ostringstream oss;  // Поток для записи строки
     oss << std::fixed << std::setprecision(2) << num;
     std::string s = oss.str();
     size_t dot_pos = s.find('.');
