@@ -1,21 +1,60 @@
-#ifndef DATASTRUCT_H
-#define DATASTRUCT_H
+#ifndef DATA_STRUCT_H
+#define DATA_STRUCT_H
 
-#include <iostream>
 #include <string>
-#include <complex>
-#include <utility>
+#include <iostream>
+#include <cctype>
+#include <regex>
+#include <iomanip>
+#include <cmath>
+
+const int LABEL_LENGTH = 4;
+const char OPTION_ONE = '1';
+const char OPTION_TWO = '2';
+const char OPTION_THREE = '3';
+
+const double INVALID_DOUBLE_INDICATOR = 0.0;
+const long long INVALID_LL_INDICATOR = 0LL;
+const std::string INVALID_STR_INDICATOR = "";
+
+const std::string REGEX_DBL_LIT_DOUBLE = "^([0]|[1-9][0-9]*)(\\.([0-9]+))[dD]?$";
+const std::string REGEX_DBL_LIT_INT = "^([0]|[1-9][0-9]*)[dD]?$";
+const std::string REGEX_SLL = "^[+-]?([0]|[1-9][0-9]*)(ll|LL)?$";
 
 struct DataStruct
 {
-    double key1; // Для DBL LIT и DBL SCI
-    long long key2; // Для SLL LIT
-    std::string key3; // Для строк
+    double key1;
+    long long key2;
+    std::string key3;
 };
 
-std::istream& operator>>(std::istream& in, DataStruct& dest);
-std::ostream& operator<<(std::ostream& out, const DataStruct& src);
+struct SeparatorIO
+{
+    char exp;
+};
 
-bool compareDataStruct(const DataStruct& a, const DataStruct& b);
+struct LabelIO
+{
+    std::string exp;
+};
 
-#endif // DATASTRUCT_H
+class StreamGuard
+{
+public:
+    explicit StreamGuard(std::basic_ios<char>& s);
+    ~StreamGuard();
+private:
+    std::basic_ios<char>& s_;
+    std::streamsize width_;
+    char fill_;
+    std::streamsize precision_;
+    std::ios::fmtflags fmt_;
+};
+
+std::istream& operator>>(std::istream& in, DataStruct& input);
+std::ostream& operator<<(std::ostream& out, const DataStruct& output);
+std::istream& operator>>(std::istream& in, SeparatorIO sep);
+std::istream& operator>>(std::istream& in, LabelIO& sep);
+bool compareDataStruct(const DataStruct& first, const DataStruct& second);
+
+#endif
