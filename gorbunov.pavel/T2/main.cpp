@@ -28,11 +28,11 @@ int main()
 
     cleanVector(data);
 
-    if (data.empty())
-    {
-        std::cerr << "Warning: No valid data structures found" << std::endl;
-        return 1;
-    }
+if (data.empty()) {
+    std::cerr << "Warning: No valid data structures found\n";
+    std::cerr << "Looks like there is no supported record. Cannot determine input. Test skipped\n";
+    return 1;  // Возвращаем код ошибки
+}
 
     std::sort(data.begin(), data.end(), compareDataStruct);
 
