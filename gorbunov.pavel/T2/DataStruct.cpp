@@ -86,15 +86,10 @@ std::istream& operator>>(std::istream& in, DataStruct& dest)
         case OPTION_ONE: {
             std::string val;
             std::getline(in >> std::ws, val, ':');
-            if (std::regex_match(val, std::regex(REGEX_DBL_LIT_DOUBLE))) {
+            if (std::regex_match(val, std::regex(REGEX_DBL_LIT_DOUBLE)) || std::regex_match(val, std::regex(REGEX_DBL_LIT_INT))) {
                 temp.key1 = std::stod(val);
                 fields_read++;
-            }
-            else if (std::regex_match(val, std::regex(REGEX_DBL_LIT_INT))) {
-                temp.key1 = std::stod(val);
-                fields_read++;
-            }
-            else {
+            } else {
                 std::cerr << "Invalid format for key1: " << val << std::endl;
                 valid = false;
             }
@@ -106,8 +101,7 @@ std::istream& operator>>(std::istream& in, DataStruct& dest)
             if (std::regex_match(val, std::regex(REGEX_SLL))) {
                 temp.key2 = std::stoll(val);
                 fields_read++;
-            }
-            else {
+            } else {
                 std::cerr << "Invalid format for key2: " << val << std::endl;
                 valid = false;
             }
@@ -115,13 +109,11 @@ std::istream& operator>>(std::istream& in, DataStruct& dest)
         }
         case OPTION_THREE: {
             std::string val;
-            if (in >> SeparatorIO{ '\"' } && std::getline(in, val, '\"') &&
-                in >> SeparatorIO{ ':' })
+            if (in >> SeparatorIO{ '\"' } && std::getline(in, val, '\"') && in >> SeparatorIO{ ':' })
             {
                 temp.key3 = val;
                 fields_read++;
-            }
-            else {
+            } else {
                 std::cerr << "Invalid format for key3: " << val << std::endl;
                 valid = false;
             }
