@@ -1,73 +1,69 @@
-#include "data_struct.hpp"
+#include "custom_struct.hpp"
 
-petrov::StreamGuard::StreamGuard(std::basic_ios< char > & s):
-  s_(s),
-  width_(s.width()),
-  fill_(s.fill()),
-  precision_(s.precision()),
-  fmt_(s.flags())
+custom_namespace::StreamManager::StreamManager(std::basic_ios< char > & stream):
+  stream_(stream),
+  width_(stream.width()),
+  fill_(stream.fill()),
+  precision_(stream.precision()),
+  format_(stream.flags())
 {}
 
-petrov::StreamGuard::~StreamGuard()
+custom_namespace::StreamManager::~StreamManager()
 {
-  s_.width(width_);
-  s_.fill(fill_);
-  s_.precision(precision_);
-  s_.flags(fmt_);
+  stream_.width(width_);
+  stream_.fill(fill_);
+  stream_.precision(precision_);
+  stream_.flags(format_);
 }
 
-namespace petrov
+namespace custom_namespace
 {
-  std::istream & operator>>(std::istream & in, DelimiterIO && dest)
+  std::istream & operator>>(std::istream & in, TokenSeparator && token)
   {
       std::istream::sentry sentry(in);
       if (!sentry)
       {
         return in;
       }
-      char c = '0';
-      in >> c;
-      if (in && (c != dest.exp))
+      char ch = '0';
+      in >> ch;
+      if (in && (ch != token.delimiter))
       {
         in.setstate(std::ios::failbit);
       }
       return in;
   }
 
-  std::istream & operator>>(std::istream & in, DoubleIO && dest)
+  std::istream & operator>>(std::istream & in, DoubleInput && input)
   {
     std::istream::sentry sentry(in);
     if (!sentry)
     {
       return in;
     }
-    in >> dest.ref;
-    char postfix = '0';
-    in >> postfix;
-    if (in && postfix != 'd' && postfix != 'D')
+    in >> input.value;
+    char ch = '0';
+    in >> ch;
+    if (in && ch != 'd' && ch != 'D')
     {
       in.setstate(std::ios::failbit);
     }
     return in;
   }
 
-  std::istream & operator>>(std::istream & in, LongLongIO && dest)
+  std::istream & operator>>(std::istream & in, LongLongInput && input)
   {
     std::istream::sentry sentry(in);
     if (!sentry)
     {
       return in;
     }
-    in >> dest.ref;
-    char postfix = '0';
-    in >> postfix;
-    if (in && postfix == 'l')
+    in >> input.value;
+    char ch = '0';
+    in >> ch;
+    if (in && (ch == 'l' || ch == 'L'))
     {
-      return in >> DelimiterIO{ 'l' };
-    }
-    else if (in && postfix == 'L')
-    {
-      return in >> DelimiterIO{ 'L' };
+      return in >> TokenSeparator{ ch };
     }
     else if (in)
     {
@@ -76,76 +72,76 @@ namespace petrov
     return in;
   }
 
-  std::istream & operator>>(std::istream & in, StringIO && dest)
+  std::istream & operator>>(std::istream & in, StringInput && input)
   {
     std::istream::sentry sentry(in);
     if (!sentry)
     {
       return in;
     }
-    return std::getline(in >> DelimiterIO{ '"' }, dest.ref, '"');
+    return std::getline(in >> TokenSeparator{ '"' }, input.value, '"');
   }
 
-  std::istream & operator>>(std::istream & in, DataStruct & data)
+  std::istream & operator>>(std::istream & in, CustomData & data)
   {
     std::istream::sentry sentry(in);
     if (!sentry)
     {
       return in;
     }
-    DataStruct input;
+    CustomData inputData;
     std::string key = "";
     {
-      using sep = DelimiterIO;
-      using dbl = DoubleIO;
-      using lli = LongLongIO;
-      using str = StringIO;
-      in >> sep{ '(' };
-      in >> sep{ ':' };
+      using separator = TokenSeparator;
+      using dblInput = DoubleInput;
+      using llInput = LongLongInput;
+      using strInput = StringInput;
+      in >> separator{ '(' };
+      in >> separator{ ':' };
       for (size_t i = 1; i <= 3; i++)
       {
         in >> key;
-        if (key == "key1")
+        if (key == "firstValue")
         {
-          in >> dbl{ input.key1 };
-          in >> sep{ ':' };
+          in >> dblInput{ inputData.firstValue };
+          in >> separator{ ':' };
         }
-        else if (key == "key2")
+        else if (key == "secondValue")
         {
-          in >> lli{ input.key2 };
-          in >> sep{ ':' };
+          in >> llInput{ inputData.secondValue };
+          in >> separator{ ':' };
         }
-        else if (key == "key3")
+        else if (key == "thirdValue")
         {
-          in >> str{ input.key3 };
-          in >> sep{ ':' };
+          in >> strInput{ inputData.thirdValue };
+          in >> separator{ ':' };
         }
         else
         {
           in.setstate(std::ios::failbit);
         }
       }
-      in >> sep{ ')' };
+      in >> separator{ ')' };
     }
     if (in)
     {
-      data = input;
+      data = inputData;
     }
     return in;
   }
 
-  std::ostream & operator<<(std::ostream & out, const DataStruct & src)
+  std::ostream & operator<<(std::ostream & out, const CustomData & data)
   {
     std::ostream::sentry sentry(out);
     if (!sentry)
     {
       return out;
     }
-    StreamGuard outguard(out);
+    StreamManager outGuard(out);
     out << "(:";
-    out << "key1 " << std::fixed << std::setprecision(1) << src.key1 << "d";
-    out << ":key2 " << src.key2 << "ll";
-    out << ":key3 " << "\"" << src.key3 << "\"";
+    out << "firstValue " << std::fixed << std::setprecision(1) << data.firstValue << "d";
+    out << ":secondValue " << data.secondValue << "ll";
+    out << ":thirdValue \"" << data.thirdValue << "\"";
     out << ":)";
     return out;
   }
