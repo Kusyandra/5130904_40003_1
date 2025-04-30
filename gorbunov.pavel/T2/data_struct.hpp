@@ -5,7 +5,7 @@
 #include <string>
 #include <iomanip>
 
-namespace gorb
+namespace gorbunov
 {
   struct DataStruct
   {
