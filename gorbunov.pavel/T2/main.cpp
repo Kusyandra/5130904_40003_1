@@ -49,3 +49,4 @@ int main()
       std::ostream_iterator<CustomData>(std::cout, "\n")
   );
 }
+
