@@ -73,6 +73,7 @@ std::istream& operator>>(std::istream& in, DataStruct& dest)
     LabelIO label;
     bool valid = true;
 
+    // Проверка на '(' и ':'
     if (!(in >> SeparatorIO{ '(' } >> SeparatorIO{ ':' }))
         valid = false;
 
