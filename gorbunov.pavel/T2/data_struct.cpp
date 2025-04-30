@@ -1,6 +1,6 @@
 #include "data_struct.hpp"
 
-petrov::StreamGuard::StreamGuard(std::basic_ios< char > & s):
+gorbunov::StreamGuard::StreamGuard(std::basic_ios< char > & s):
   s_(s),
   width_(s.width()),
   fill_(s.fill()),
@@ -8,7 +8,7 @@ petrov::StreamGuard::StreamGuard(std::basic_ios< char > & s):
   fmt_(s.flags())
 {}
 
-petrov::StreamGuard::~StreamGuard()
+gorbunov::StreamGuard::~StreamGuard()
 {
   s_.width(width_);
   s_.fill(fill_);
@@ -16,7 +16,7 @@ petrov::StreamGuard::~StreamGuard()
   s_.flags(fmt_);
 }
 
-namespace petrov
+namespace gorbunov
 {
   std::istream & operator>>(std::istream & in, DelimiterIO && dest)
   {
