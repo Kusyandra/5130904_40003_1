@@ -1,164 +1,146 @@
-#include "DataStruct.h"
-#include <stdexcept>
-#include <sstream>
-#include <iostream>
-#include <regex>
+#include "data_structure.hpp"
 
-StreamGuard::StreamGuard(std::basic_ios<char>& s) :
-    s_(s),
-    width_(s.width()),
-    fill_(s.fill()),
-    precision_(s.precision()),
-    fmt_(s.flags())
+custom_namespace::StreamSaver::StreamSaver(std::basic_ios< char > & stream):
+  stream_(stream),
+  width_(stream.width()),
+  fill_(stream.fill()),
+  precision_(stream.precision()),
+  format_(stream.flags())
+{}
+
+custom_namespace::StreamSaver::~StreamSaver()
 {
+  stream_.width(width_);
+  stream_.fill(fill_);
+  stream_.precision(precision_);
+  stream_.flags(format_);
 }
 
-StreamGuard::~StreamGuard()
+namespace custom_namespace
 {
-    s_.width(width_);
-    s_.fill(fill_);
-    s_.precision(precision_);
-    s_.flags(fmt_);
-}
-
-std::istream& operator>>(std::istream& in, SeparatorIO sep)
-{
+  std::istream & operator>>(std::istream & in, Separator && separator)
+  {
     std::istream::sentry sentry(in);
-    if (!sentry) return in;
-
-    char c;
-    if (in >> c && c != sep.exp)
-        in.setstate(std::ios::failbit);
-    return in;
-}
-
-std::istream& operator>>(std::istream& in, LabelIO& sep)
-{
-    std::istream::sentry sentry(in);
-    if (!sentry) return in;
-
-    std::string label;
-    if (in >> label &&
-        label.length() == LABEL_LENGTH &&
-        label.substr(0, 3) == "key" &&
-        isdigit(label[3]))
+    if (!sentry)
     {
-        sep.exp = label;
+      return in;
     }
-    else
+    char tempChar = '0';
+    in >> tempChar;
+    if (in && (tempChar != separator.delimiter))
     {
-        in.setstate(std::ios::failbit);
+      in.setstate(std::ios::failbit);
     }
     return in;
-}
+  }
 
-std::string getCorrectRound(double num)
-{
-    std::ostringstream oss;
-    oss << std::fixed << std::setprecision(2) << num;
-    std::string s = oss.str();
-    size_t dot_pos = s.find('.');
-    if (dot_pos != std::string::npos)
-    {
-        s.erase(s.find_last_not_of('0') + 1, std::string::npos);
-        if (s.back() == '.') s.pop_back();
-    }
-    return s;
-}
-
-std::istream& operator>>(std::istream& in, DataStruct& dest)
-{
+  std::istream & operator>>(std::istream & in, DoubleValue && value)
+  {
     std::istream::sentry sentry(in);
-    if (!sentry) return in;
-
-    DataStruct temp;
-    LabelIO label;
-    bool valid = true;
-
-    if (!(in >> SeparatorIO{ '(' } >> SeparatorIO{ ':' }))
-        valid = false;
-
-    int fields_read = 0;
-    while (valid && fields_read < 3 && in >> label)
+    if (!sentry)
     {
-        switch (label.exp[3])
+      return in;
+    }
+    in >> value.reference;
+    char postfix = '0';
+    in >> postfix;
+    if (in && (postfix != 'd' && postfix != 'D'))
+    {
+      in.setstate(std::ios::failbit);
+    }
+    return in;
+  }
+
+  std::istream & operator>>(std::istream & in, LongLongValue && value)
+  {
+    std::istream::sentry sentry(in);
+    if (!sentry)
+    {
+      return in;
+    }
+    in >> value.reference;
+    char postfix = '0';
+    in >> postfix;
+    if (in && (postfix == 'l' || postfix == 'L'))
+    {
+      return in >> Separator{ postfix };
+    }
+    else if (in)
+    {
+      in.setstate(std::ios::failbit);
+    }
+    return in;
+  }
+
+  std::istream & operator>>(std::istream & in, StringValue && value)
+  {
+    std::istream::sentry sentry(in);
+    if (!sentry)
+    {
+      return in;
+    }
+    return std::getline(in >> Separator{ '"' }, value.reference, '"');
+  }
+
+  std::istream & operator>>(std::istream & in, DataContainer & container)
+  {
+    std::istream::sentry sentry(in);
+    if (!sentry)
+    {
+      return in;
+    }
+    DataContainer tempContainer;
+    std::string key = "";
+    {
+      using sep = Separator;
+      using dbl = DoubleValue;
+      using lli = LongLongValue;
+      using str = StringValue;
+      in >> sep{ '(' };
+      in >> sep{ ':' };
+      for (size_t i = 1; i <= 3; i++)
+      {
+        in >> key;
+        if (key == "firstKey")
         {
-        case OPTION_ONE: {
-            std::string val;
-            std::getline(in >> std::ws, val, ':');
-            if (std::regex_match(val, std::regex(REGEX_DBL_LIT_DOUBLE))) {
-                temp.key1 = std::stod(val);
-                fields_read++;
-            }
-            else if (std::regex_match(val, std::regex(REGEX_DBL_LIT_INT))) {
-                temp.key1 = std::stod(val);
-                fields_read++;
-            }
-            else {
-                std::cerr << "Invalid format for key1: " << val << std::endl;
-                valid = false;
-            }
-            break;
+          in >> dbl{ tempContainer.firstKey };
+          in >> sep{ ':' };
         }
-        case OPTION_TWO: {
-            std::string val;
-            std::getline(in >> std::ws, val, ':');
-            if (std::regex_match(val, std::regex(REGEX_SLL))) {
-                temp.key2 = std::stoll(val);
-                fields_read++;
-            }
-            else {
-                std::cerr << "Invalid format for key2: " << val << std::endl;
-                valid = false;
-            }
-            break;
+        else if (key == "secondKey")
+        {
+          in >> lli{ tempContainer.secondKey };
+          in >> sep{ ':' };
         }
-        case OPTION_THREE: {
-            std::string val;
-            if (in >> SeparatorIO{ '\"' } && std::getline(in, val, '\"') &&
-                in >> SeparatorIO{ ':' })
-            {
-                temp.key3 = val;
-                fields_read++;
-            }
-            else {
-                std::cerr << "Invalid format for key3: " << val << std::endl;
-                valid = false;
-            }
-            break;
+        else if (key == "thirdKey")
+        {
+          in >> str{ tempContainer.thirdKey };
+          in >> sep{ ':' };
         }
-        default:
-            valid = false;
+        else
+        {
+          in.setstate(std::ios::failbit);
         }
+      }
+      in >> sep{ ')' };
     }
-
-    if (valid && fields_read == 3 && (in >> SeparatorIO{ ')' }))
+    if (in)
     {
-        dest = temp;
-    }
-    else
-    {
-        in.setstate(std::ios::failbit);
-        dest = { INVALID_DOUBLE_INDICATOR, INVALID_LL_INDICATOR, INVALID_STR_INDICATOR };
+      container = tempContainer;
     }
     return in;
-}
+  }
 
-std::ostream& operator<<(std::ostream& out, const DataStruct& ds)
-{
+  std::ostream & operator<<(std::ostream & out, const DataContainer & container)
+  {
     std::ostream::sentry sentry(out);
-    if (!sentry) return out;
-
-    StreamGuard guard(out);
-    out << "(:key1 " << getCorrectRound(ds.key1) << "d"
-        << ":key2 " << ds.key2 << "ll"
-        << ":key3 \"" << ds.key3 << "\":)";
+    if (!sentry)
+    {
+      return out;
+    }
+    StreamSaver saver(out);
+    out << "(:";
+    out << "firstKey " << std::fixed << std::setprecision(1) << container.firstKey << "d";
+    out << ":secondKey " << container.secondKey << "ll";
+    out << ":thirdKey \"" << container.thirdKey << "\"";
+    out << ":)";
     return out;
-}
-
-bool compareDataStruct(const DataStruct& a, const DataStruct& b)
-{
-    if (a.key1 != b.key1) return a.key1 < b.key1;
-    if (a.key2 != b.key2) return a.key2 < b.key2;
-    return a.key3.length() < b.key3.length();
-}
