@@ -1,5 +1,6 @@
 #include "DataStruct.h"
 #include <stdexcept>
+#include <sstream>
 
 StreamGuard::StreamGuard(std::basic_ios<char>& s) :
     s_(s),
@@ -83,7 +84,7 @@ std::istream& operator>>(std::istream& in, DataStruct& dest)
         case OPTION_ONE: {
             std::string val;
             std::getline(in >> std::ws, val, ':');
-            if (std::regex_match(val, std::regex(REGEX_DBL_LIT_DOUBLE)) {
+            if (std::regex_match(val, std::regex(REGEX_DBL_LIT_DOUBLE))) {
                 temp.key1 = std::stod(val);
                 fields_read++;
             }
@@ -92,6 +93,7 @@ std::istream& operator>>(std::istream& in, DataStruct& dest)
                 fields_read++;
             }
             else {
+                std::cerr << "Invalid format for key1: " << val << std::endl;
                 valid = false;
             }
             break;
@@ -104,6 +106,7 @@ std::istream& operator>>(std::istream& in, DataStruct& dest)
                 fields_read++;
             }
             else {
+                std::cerr << "Invalid format for key2: " << val << std::endl;
                 valid = false;
             }
             break;
@@ -117,6 +120,7 @@ std::istream& operator>>(std::istream& in, DataStruct& dest)
                 fields_read++;
             }
             else {
+                std::cerr << "Invalid format for key3: " << val << std::endl;
                 valid = false;
             }
             break;
